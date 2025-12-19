@@ -114,7 +114,7 @@ All tables use RLS policies ensuring:
 ### 1. Clone and Install
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/devmique/saas-workspace-dashboard
 cd workspace-saas-dashboard
 npm install
 ```
