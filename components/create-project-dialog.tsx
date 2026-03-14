@@ -35,7 +35,7 @@ export function CreateProjectDialog({ workspaceId }: CreateProjectDialogProps) {
       try {
         await createProject(workspaceId, formData)
         setOpen(false)
-        e.currentTarget.reset()
+        e.currentTarget?.reset()
       } catch (error) {
         console.error("Failed to create project:", error)
       }

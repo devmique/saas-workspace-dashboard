@@ -70,7 +70,7 @@ This is a complete SaaS application that showcases production-ready patterns inc
 │   ├── 001_create_schema.sql
 │   ├── 002_seed_demo_data.sql
 │   └── 003_fix_rls_policies.sql
-└── proxy.ts                 # Middleware for auth
+└── middleware.ts                 # Middleware for auth
 ```
 
 ## Database Schema
