@@ -9,6 +9,15 @@ import { LayoutDashboard, FolderKanban, BarChart3, Settings, Users, ChevronDown,
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { CreateWorkspaceDialog } from "./create-workspace-dialog"
 import type { User } from "@supabase/supabase-js"
+import { Menu } from "lucide-react"
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetHeader,
+  SheetTitle
+} from "@/components/ui/sheet"
+
 
 interface DashboardSidebarProps {
   workspaces: Array<{
@@ -73,6 +82,50 @@ export function DashboardSidebar({ workspaces, user }: DashboardSidebarProps) {
 
   return (
     <>
+    
+      {/* Mobile Sidebar */}
+<div className="lg:hidden p-2">
+  <Sheet>
+    <SheetTrigger asChild>
+      <Button variant="ghost" size="icon">
+        <Menu className="h-5 w-5" />
+      </Button>
+    </SheetTrigger>
+
+    <SheetContent side="left" className="lg:hidden w-64 p-0">
+
+  <SheetHeader className="border-b p-4">
+    <SheetTitle>
+      {currentWorkspace?.name || "All Workspaces"}
+    </SheetTitle>
+  </SheetHeader>
+
+  <nav className="flex-1 space-y-1 overflow-y-auto p-2">
+    {navigation.map((item) => {
+      const Icon = item.icon
+      return (
+        <Link
+          key={item.name}
+          href={item.href}
+          className={cn(
+            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+            item.current
+              ? "bg-primary text-primary-foreground"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground"
+          )}
+        >
+          <Icon className="h-4 w-4" />
+          {item.name}
+        </Link>
+      )
+    })}
+  </nav>
+
+</SheetContent>
+
+  </Sheet>
+</div>
+
       <aside className="hidden w-64 flex-col border-r bg-muted/40 lg:flex">
         <div className="flex h-14 items-center border-b px-4">
           <DropdownMenu>

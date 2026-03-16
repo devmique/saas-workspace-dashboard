@@ -39,7 +39,7 @@ export function WorkspaceList({ workspaces }: WorkspaceListProps) {
                 asChild
                 size="sm"
                 variant="ghost"
-                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                className=""
               >
                 <Link href={`/dashboard/${workspace.id}`}>
                   <ArrowRight className="h-4 w-4" />
