@@ -168,3 +168,71 @@ export async function deleteWorkspace(workspaceId: string) {
 
   return { success: true }
 }
+
+//add member to workspace
+export async function inviteMember(workspaceId: string, email: string) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) redirect("/auth/login")
+
+  // Check invoker is owner/admin
+  const { data: membership } = await supabase
+    .from("workspace_members")
+    .select("role")
+    .eq("workspace_id", workspaceId)
+    .eq("user_id", user.id)
+    .single()
+
+  if (!membership || !["owner", "admin"].includes(membership.role)) {
+    throw new Error("Unauthorized")
+  }
+
+  // Look up invitee by email in profiles
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("email", email)
+    .single()
+
+  if (profileError || !profile) {
+    throw new Error("No user found with that email address.")
+  }
+
+  // Check if already a member
+  const { data: existing } = await supabase
+    .from("workspace_members")
+    .select("id")
+    .eq("workspace_id", workspaceId)
+    .eq("user_id", profile.id)
+    .single()
+
+  if (existing) {
+    throw new Error("This user is already a member of the workspace.")
+  }
+
+  // Add as member
+  const { error: insertError } = await supabase.from("workspace_members").insert({
+    workspace_id: workspaceId,
+    user_id: profile.id,
+    role: "member",
+  })
+
+  if (insertError) throw insertError
+
+  // Log activity
+  await supabase.from("activity_logs").insert({
+    workspace_id: workspaceId,
+    user_id: user.id,
+    action: "invited member",
+    entity_type: "workspace_member",
+    entity_id: profile.id,
+    metadata: { invited_email: email },
+  })
+
+  revalidatePath(`/dashboard/${workspaceId}/team`)
+  return { success: true }
+}
