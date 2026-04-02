@@ -137,3 +137,34 @@ export async function signOut() {
   await supabase.auth.signOut()
   redirect("/auth/login")
 }
+
+//delete workspace
+export async function deleteWorkspace(workspaceId: string) {
+  const supabase = await createClient()
+
+  // Get user info for logging
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) throw new Error("Unauthorized")
+
+  // Log deletion attempt
+  await supabase.from("activity_logs").insert({
+    workspace_id: workspaceId,
+    user_id: user.id,
+    action: "deleted workspace",
+    entity_type: "workspace",
+    entity_id: workspaceId,
+    metadata: { deleted_by: user.id },
+  })
+
+  // Delete workspace 
+  const { error } = await supabase.from("workspaces").delete().eq("id", workspaceId)
+  if (error) throw error
+
+  // Revalidate dashboard path to update UI
+  revalidatePath("/dashboard")
+
+  return { success: true }
+}

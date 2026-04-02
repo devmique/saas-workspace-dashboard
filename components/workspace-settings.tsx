@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -8,6 +9,8 @@ import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 import type { Workspace } from "@/lib/types"
+import { useRouter } from "next/navigation"
+import { deleteWorkspace } from "@/lib/actions"
 
 interface WorkspaceSettingsProps {
   workspace: Workspace
@@ -16,6 +19,26 @@ interface WorkspaceSettingsProps {
 
 export function WorkspaceSettings({ workspace, userRole }: WorkspaceSettingsProps) {
   const isOwner = userRole === "owner"
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [typedName, setTypedName] = useState("")
+  const router = useRouter()
+
+  async function handleDelete() {
+    if (!isNameMatched) return // safety check
+
+    try {
+      setIsDeleting(true)
+      await deleteWorkspace(workspace.id)
+      alert("Workspace deleted successfully")
+      router.push("/dashboard") // redirect after deletion
+    } catch (error: any) {
+      console.error("Delete failed:", error)
+      alert(error.message || "Failed to delete workspace")
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+  const isNameMatched = typedName === workspace.name
 
   return (
     <div className="space-y-6">
@@ -53,8 +76,26 @@ export function WorkspaceSettings({ workspace, userRole }: WorkspaceSettingsProp
               </AlertDescription>
             </Alert>
             <Separator />
-            <Button variant="destructive" disabled>
-              Delete Workspace
+
+            <div className="space-y-2">
+              <Label htmlFor="confirm-delete">
+                Type the workspace name <strong>{workspace.name}</strong> to confirm
+              </Label>
+              <Input
+                id="confirm-delete"
+                value={typedName}
+                onChange={(e) => setTypedName(e.target.value)}
+                placeholder="Workspace name"
+              />
+            </div>
+
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={!isNameMatched || isDeleting}
+              className="cursor-pointer"
+            >
+              {isDeleting ? "Deleting..." : "Delete Workspace"}
             </Button>
           </CardContent>
         </Card>
